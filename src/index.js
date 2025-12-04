@@ -35,20 +35,28 @@ function formatDateInput(date) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-const canSendRealEmail = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS;
+// 🔹 Transporter REAL usando tus variables de entorno
+const mailTransporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // Gmail con 587 usa STARTTLS
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
-let mailTransporter = null;
-if (canSendRealEmail) {
-  mailTransporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
-    }
-  });
-}
+// (Opcional pero útil para ver si la config está bien)
+mailTransporter.verify((error, success) => {
+  if (error) {
+    console.error('❌ Error verificando el transporter SMTP:', error);
+  } else {
+    console.log('✅ Servidor SMTP listo para enviar correos');
+  }
+});
+
+
+
 
 app.use(cors());
 app.use(express.json());
@@ -382,7 +390,6 @@ app.get('/alertas/simular', (req, res) => {
   });
 });
 
-
 // Enviar alerta/manual para una sola sesión seleccionada
 app.post('/alertas/enviar-uno', (req, res) => {
   const { id } = req.body;
@@ -431,29 +438,24 @@ Saludos,
 Sistema de Onboarding
     `.trim();
 
-    if (canSendRealEmail && mailTransporter) {
-      try {
-        await mailTransporter.sendMail({
-          from: process.env.SMTP_FROM || process.env.SMTP_USER,
-          to: para,
-          subject: asunto,
-          text: mensajeTexto
-        });
-        console.log(`✉️ [ENVIADO - MANUAL] Alerta enviada a ${para} para la sesión "${sesion.nombre}"`);
-      } catch (e) {
-        console.error(`❌ Error enviando correo manual a ${para}:`, e);
-      }
-    } else {
-      console.log('✉️ [SIMULACIÓN - MANUAL] Se enviaría correo a:', para);
-      console.log('Asunto:', asunto);
-      console.log('Mensaje:\n', mensajeTexto);
+    try {
+      await mailTransporter.sendMail({
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: para,
+        subject: asunto,
+        text: mensajeTexto,
+      });
+
+      console.log(`✉️ [ENVIADO - MANUAL] Alerta enviada a ${para} para la sesión "${sesion.nombre}"`);
+    } catch (e) {
+      console.error(`❌ Error enviando correo manual a ${para}:`, e);
+      // Si quieres informar fallo al usuario:
+      // return res.status(500).send('No se pudo enviar el correo');
     }
 
     res.redirect('/colaboradores#alertas');
   });
 });
-
-
 
 
 
