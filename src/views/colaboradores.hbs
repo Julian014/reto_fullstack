@@ -5,34 +5,86 @@
   <title>Gestión de Onboarding</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100">
+<body class="min-h-screen bg-gradient-to-br from-[#f4f6fb] via-white to-[#e5ecfa]">
 
-  <div class="max-w-6xl mx-auto mt-10 mb-10 bg-white p-8 shadow rounded space-y-10">
+  <div class="max-w-6xl mx-auto mt-10 mb-10 bg-white/95 backdrop-blur-xl border border-[#d2ddf5] p-6 md:p-8 shadow-[0_18px_40px_rgba(0,0,0,0.08)] rounded-2xl space-y-8">
 
-    <header class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold">Gestión de Onboarding de Colaboradores</h1>
-        <p class="text-sm text-gray-600 mt-1">
-          Registro de colaboradores, estados de onboarding, calendario técnico y alertas simuladas en una sola interfaz.
-        </p>
+    <header class="relative overflow-hidden rounded-2xl border border-[#d2ddf5] bg-gradient-to-r from-[#0033a0] via-[#0046c0] to-[#005bea] px-5 py-4 md:px-6 md:py-5 text-white shadow-sm">
+      <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="space-y-1">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-xs font-medium">
+            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#ffc20e] text-[#0033a0] text-sm font-bold">
+              B
+            </span>
+            <span>Onboarding talento · Banco de Bogotá</span>
+          </div>
+          <h1 class="text-2xl md:text-3xl font-semibold tracking-tight text-white">
+            Gestión de Onboarding de Colaboradores
+          </h1>
+          <p class="text-xs md:text-sm text-white/80 max-w-xl">
+            Administra el registro de colaboradores, el avance de sus procesos de bienvenida y formación técnica, y el calendario de sesiones clave desde un solo lugar.
+          </p>
+        </div>
+        <nav class="flex flex-wrap gap-2 text-xs md:text-sm bg-white/10 px-2.5 py-2 rounded-2xl border border-white/20 backdrop-blur-sm">
+          <button
+            type="button"
+            data-section-target="registro"
+            class="section-tab inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-transparent text-white/80 hover:bg-white/10 hover:text-white transition"
+          >
+            <span>👤</span>
+            <span>Registro</span>
+          </button>
+          <button
+            type="button"
+            data-section-target="dashboard"
+            class="section-tab inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-[#ffc20e] bg-[#ffc20e] text-[#0033a0] font-semibold shadow-sm"
+          >
+            <span>📊</span>
+            <span>Dashboard</span>
+          </button>
+          <button
+            type="button"
+            data-section-target="calendario"
+            class="section-tab inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-transparent text-white/80 hover:bg-white/10 hover:text-white transition"
+          >
+            <span>📅</span>
+            <span>Calendario técnico</span>
+          </button>
+        </nav>
       </div>
-      <nav class="flex flex-wrap gap-2 text-sm">
-        <a href="#registro" class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100">Registro</a>
-        <a href="#dashboard" class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100">Dashboard</a>
-        <a href="#calendario" class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100">Calendario Técnico</a>
-        <a href="#alertas" class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-100">Alertas</a>
-      </nav>
+      <span class="pointer-events-none absolute inset-y-0 right-0 w-40 bg-[radial-gradient(circle_at_top,_rgba(255,194,14,0.4),_transparent_60%)] opacity-80"></span>
     </header>
 
     <!-- 1. Registro de colaboradores -->
-    <section id="registro" class="space-y-4">
-      <h2 class="text-xl font-semibold">🧑‍💼 Registro de colaboradores</h2>
-      <p class="text-sm text-gray-600">
+    <section id="registro" class="section-panel space-y-4 hidden">
+      <h2 class="text-xl font-semibold text-slate-900">🧑‍💼 Registro de colaboradores</h2>
+      <p class="text-sm text-slate-600">
         Crea nuevos colaboradores indicando su fecha de ingreso y, opcionalmente, una fecha de onboarding técnico asignada.
         Los estados de onboarding se inician como pendientes (❌) y se pueden marcar como completados desde el dashboard.
       </p>
 
-      <form action="/colaboradores/crear" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+      <!-- Botón tipo tarjeta para mostrar el formulario -->
+      <button
+        type="button"
+        id="btnMostrarRegistro"
+        class="w-full md:w-auto flex items-center gap-3 bg-white border border-dashed border-[#c5d2f0] rounded-xl px-4 py-3 shadow-sm hover:border-[#0033a0] hover:shadow-md transition"
+      >
+        <div class="flex h-10 w-10 items-center justify-center rounded-full bg-[#0033a0] text-white text-2xl">
+          👤+
+        </div>
+        <div class="flex flex-col items-start text-left">
+          <span class="text-sm font-semibold text-gray-800">Agregar nuevo colaborador</span>
+          <span class="text-xs text-gray-500">Haz clic para abrir el formulario de registro</span>
+        </div>
+      </button>
+
+      <!-- Formulario de registro (oculto por defecto) -->
+      <form
+        id="formRegistroColaborador"
+        action="/colaboradores/crear"
+        method="POST"
+        class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#f7f8fc] p-4 rounded-xl border border-[#d2ddf5] mt-4 hidden"
+      >
         <div class="md:col-span-2">
           <label class="block text-sm font-medium mb-1">Nombre completo</label>
           <input name="nombre" class="w-full border p-2 rounded" placeholder="Nombre completo" required>
@@ -49,24 +101,31 @@
           <label class="block text-sm font-medium mb-1">Fecha onboarding técnico (opcional)</label>
           <input name="fecha_onboarding_tecnico" type="date" class="w-full border p-2 rounded">
         </div>
-        <div class="md:col-span-2 flex items-end">
+        <div class="md:col-span-2 flex items-end gap-2">
           <button class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
             Guardar colaborador
+          </button>
+          <button
+            type="button"
+            id="btnCerrarRegistro"
+            class="whitespace-nowrap px-3 py-2 border border-gray-300 rounded text-xs text-gray-600 hover:bg-gray-100"
+          >
+            Cancelar
           </button>
         </div>
       </form>
     </section>
 
     <!-- 2. Dashboard de colaboradores -->
-    <section id="dashboard" class="space-y-4">
-      <h2 class="text-xl font-semibold">📊 Dashboard de colaboradores</h2>
-      <p class="text-sm text-gray-600">
+    <section id="dashboard" class="section-panel space-y-4">
+      <h2 class="text-xl font-semibold text-slate-900">📊 Dashboard de colaboradores</h2>
+      <p class="text-sm text-slate-600">
         Visualiza el estado de los onboardings de bienvenida y técnico, filtra por tipo y estado, y marca los procesos como completados.
         También puedes editar los datos de cada colaborador desde esta misma vista.
       </p>
 
       <!-- Filtros -->
-      <form method="GET" action="/colaboradores" class="flex flex-wrap items-end gap-4 bg-gray-50 p-4 rounded border">
+      <form method="GET" action="/colaboradores" class="flex flex-wrap items-end gap-4 bg-[#f7f8fc] p-4 rounded-xl border border-[#d2ddf5]">
         <div>
           <label class="block text-sm font-medium mb-1">Tipo de onboarding</label>
           <select name="tipoOnboarding" class="border p-2 rounded">
@@ -85,29 +144,29 @@
           </select>
         </div>
 
-        <button class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-black">
+        <button class="bg-[#0033a0] text-white px-4 py-2 rounded-lg hover:bg-[#00246e] shadow-sm text-sm font-medium">
           Aplicar filtros
         </button>
       </form>
 
       <!-- Tabla de colaboradores -->
-      <div class="overflow-x-auto border rounded">
-        <table class="min-w-full border-collapse text-sm">
+      <div class="overflow-x-auto border border-[#d2ddf5] rounded-xl shadow-sm bg-white">
+        <table class="min-w-full border-collapse text-sm text-slate-700">
           <thead>
-            <tr class="bg-gray-200">
-              <th class="p-2 border">Nombre</th>
-              <th class="p-2 border">Correo</th>
-              <th class="p-2 border">Fecha ingreso</th>
-              <th class="p-2 border">Onb. Bienvenida</th>
-              <th class="p-2 border">Onb. Técnico</th>
-              <th class="p-2 border">Fecha Onb. Técnico</th>
-              <th class="p-2 border">Acciones</th>
+            <tr class="bg-[#eef2ff]">
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Nombre</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Correo</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Fecha ingreso</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Onb. Bienvenida</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Onb. Técnico</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Fecha Onb. Técnico</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Acciones</th>
             </tr>
           </thead>
           <tbody>
             {{#if colaboradores.length}}
               {{#each colaboradores}}
-                <tr class="align-top">
+                <tr class="align-top even:bg-[#f4f6ff]">
                   <td class="p-2 border">{{nombre}}</td>
                   <td class="p-2 border">{{correo}}</td>
                   <td class="p-2 border">{{fecha_ingreso_display}}</td>
@@ -149,7 +208,7 @@
                       {{!-- Edición inline --}}
                       <details class="mt-1">
                         <summary class="text-xs text-blue-700 cursor-pointer">Editar</summary>
-                        <form method="POST" action="/colaboradores/{{id}}/actualizar" class="mt-2 space-y-1 text-xs bg-gray-50 p-2 rounded border">
+                        <form method="POST" action="/colaboradores/{{id}}/actualizar" class="mt-2 space-y-1 text-xs bg-[#f7f8fc] p-2 rounded border border-[#d2ddf5]">
                           <div>
                             <label class="block mb-1">Nombre</label>
                             <input name="nombre" class="w-full border p-1 rounded" value="{{nombre}}">
@@ -202,15 +261,15 @@
     </section>
 
     <!-- 3. Calendario de Onboardings Técnicos -->
-    <section id="calendario" class="space-y-4">
-      <h2 class="text-xl font-semibold">📅 Calendario de Onboardings Técnicos</h2>
-      <p class="text-sm text-gray-600">
+    <section id="calendario" class="section-panel space-y-4 hidden">
+      <h2 class="text-xl font-semibold text-slate-900">📅 Calendario de Onboardings Técnicos</h2>
+      <p class="text-sm text-slate-600">
         Gestiona el calendario anual de sesiones técnicas como Journey to Cloud y otros capítulos. 
         Cada bloque puede representar entre 5 y 7 días de formación.
       </p>
 
       <!-- Formulario para crear sesiones de onboarding técnico -->
-      <form action="/calendario/crear" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-gray-50 p-4 rounded border">
+      <form action="/calendario/crear" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#f7f8fc] p-4 rounded-xl border border-[#d2ddf5]">
         <div>
           <label class="block text-sm font-medium mb-1">Nombre de la sesión</label>
           <input name="nombre" class="w-full border p-2 rounded" placeholder="Journey to Cloud" required>
@@ -243,24 +302,24 @@
       </form>
 
       <!-- Tabla de sesiones -->
-      <div class="overflow-x-auto border rounded">
-        <table class="min-w-full border-collapse text-sm">
+      <div class="overflow-x-auto border border-[#d2ddf5] rounded-xl shadow-sm bg-white">
+        <table class="min-w-full border-collapse text-sm text-slate-700">
           <thead>
-            <tr class="bg-gray-200">
-              <th class="p-2 border">Nombre</th>
-              <th class="p-2 border">Capítulo</th>
-              <th class="p-2 border">Responsable</th>
-              <th class="p-2 border">Correo responsable</th>
-              <th class="p-2 border">Fecha inicio</th>
-              <th class="p-2 border">Fecha fin</th>
-              <th class="p-2 border">Duración (días)</th>
-              <th class="p-2 border">Recordar</th>
+            <tr class="bg-[#eef2ff]">
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Nombre</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Capítulo</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Responsable</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Correo responsable</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Fecha inicio</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Fecha fin</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Duración (días)</th>
+              <th class="p-2 border text-left text-xs font-semibold text-slate-700">Recordar</th>
             </tr>
           </thead>
           <tbody>
             {{#if sesiones.length}}
               {{#each sesiones}}
-                <tr>
+                <tr class="even:bg-[#f4f6ff]">
                   <td class="p-2 border">{{nombre}}</td>
                   <td class="p-2 border">{{capitulo}}</td>
                   <td class="p-2 border">{{responsable_nombre}}</td>
@@ -292,6 +351,73 @@
       </div>
     </section>
 
+    <script>
+      document.addEventListener('DOMContentLoaded', function () {
+        // Toggle del formulario de registro
+        const btnMostrar = document.getElementById('btnMostrarRegistro');
+        const btnCerrar = document.getElementById('btnCerrarRegistro');
+        const form = document.getElementById('formRegistroColaborador');
+
+        if (btnMostrar && form) {
+          btnMostrar.addEventListener('click', () => {
+            const isHidden = form.classList.contains('hidden');
+            if (isHidden) {
+              form.classList.remove('hidden');
+              btnMostrar.classList.add('hidden');
+            } else {
+              form.classList.add('hidden');
+              btnMostrar.classList.remove('hidden');
+            }
+          });
+        }
+
+        if (btnCerrar && form && btnMostrar) {
+          btnCerrar.addEventListener('click', () => {
+            form.classList.add('hidden');
+            btnMostrar.classList.remove('hidden');
+          });
+        }
+
+        // Tabs de secciones: Registro, Dashboard, Calendario, Alertas
+        const tabs = document.querySelectorAll('.section-tab');
+        const panels = document.querySelectorAll('.section-panel');
+
+        function activateSection(targetId) {
+          // Mostrar solo el panel objetivo
+          panels.forEach(panel => {
+            if (panel.id === targetId) {
+              panel.classList.remove('hidden');
+            } else {
+              panel.classList.add('hidden');
+            }
+          });
+
+          // Estilos de tab activo / inactivo
+          tabs.forEach(tab => {
+            const tabTarget = tab.getAttribute('data-section-target');
+            if (tabTarget === targetId) {
+              tab.classList.add('bg-[#ffc20e]', 'text-[#0033a0]', 'border-[#ffc20e]', 'shadow-sm', 'font-semibold');
+              tab.classList.remove('border-transparent', 'text-slate-600');
+            } else {
+              tab.classList.remove('bg-[#ffc20e]', 'text-[#0033a0]', 'border-[#ffc20e]', 'shadow-sm', 'font-semibold');
+              tab.classList.add('border-transparent', 'text-slate-600');
+            }
+          });
+        }
+
+        tabs.forEach(tab => {
+          tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-section-target');
+            if (target) {
+              activateSection(target);
+            }
+          });
+        });
+
+        // Al cargar, mantener Dashboard como sección activa por defecto
+        activateSection('dashboard');
+      });
+    </script>
     
 </body>
 </html>
