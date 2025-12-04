@@ -268,6 +268,70 @@
         Cada bloque puede representar entre 5 y 7 días de formación.
       </p>
 
+      <!-- Filtro por rango de fechas -->
+      <form method="GET" action="/colaboradores" class="flex flex-wrap items-end gap-4 bg-[#f3f6ff] p-4 rounded-xl border border-[#d2ddf5]">
+        <div>
+          <label class="block text-sm font-medium mb-1">Fecha inicio (desde)</label>
+          <input name="desde" type="date" class="border p-2 rounded w-full">
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-1">Fecha fin (hasta)</label>
+          <input name="hasta" type="date" class="border p-2 rounded w-full">
+        </div>
+        <button class="bg-[#0033a0] text-white px-4 py-2 rounded-lg hover:bg-[#00246e] shadow-sm text-sm font-medium">
+          Filtrar calendario
+        </button>
+      </form>
+
+      <!-- Calendario anual visual -->
+      <div class="rounded-2xl border border-[#d2ddf5] bg-white p-4 md:p-5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between gap-2">
+          <div>
+            <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Calendario anual</p>
+            <p class="text-sm text-slate-700">
+              Vista resumida de bloques activos (5–7 días) para Journey to Cloud y otros capítulos técnicos.
+            </p>
+          </div>
+          <div class="hidden md:flex items-center gap-2 text-[11px] text-slate-500">
+            <span class="inline-flex h-2 w-6 rounded-full bg-[#003fa8]"></span> Sesión activa
+            <span class="inline-flex h-2 w-6 rounded-full bg-[#9ca3af]"></span> Línea de tiempo
+          </div>
+        </div>
+
+        {{#if sesiones.length}}
+          <div class="space-y-3">
+            {{#each sesiones}}
+              <div class="space-y-1">
+                <div class="flex items-center justify-between text-[11px] md:text-xs">
+                  <div class="flex flex-col">
+                    <span class="font-medium text-slate-700">
+                      {{nombre}}
+                      {{#if capitulo}} · {{capitulo}}{{/if}}
+                    </span>
+                    <span class="text-slate-500">
+                      {{fecha_inicio_display}} — {{fecha_fin_display}}
+                    </span>
+                  </div>
+                  <span class="ml-4 text-slate-500">
+                    Bloque de {{duracion_dias}} días
+                  </span>
+                </div>
+                <div class="h-2 w-full rounded-full bg-[#e5e7eb] overflow-hidden">
+                  <div
+                    class="h-2 rounded-full bg-[#003fa8]"
+                    style="width: {{duracion_dias}}0%; max-width: 100%;"
+                  ></div>
+                </div>
+              </div>
+            {{/each}}
+          </div>
+        {{else}}
+          <p class="text-xs text-slate-500">
+            Aún no hay sesiones técnicas configuradas. Crea bloques de 5 a 7 días para Journey to Cloud y otros capítulos usando el formulario inferior.
+          </p>
+        {{/if}}
+      </div>
+
       <!-- Formulario para crear sesiones de onboarding técnico -->
       <form action="/calendario/crear" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-[#f7f8fc] p-4 rounded-xl border border-[#d2ddf5]">
         <div>
@@ -376,7 +440,7 @@
             form.classList.add('hidden');
             btnMostrar.classList.remove('hidden');
           });
-        }
+        } 
 
         // Tabs de secciones: Registro, Dashboard, Calendario, Alertas
         const tabs = document.querySelectorAll('.section-tab');
@@ -414,8 +478,17 @@
           });
         });
 
-        // Al cargar, mantener Dashboard como sección activa por defecto
-        activateSection('dashboard');
+        // Al cargar, decidir sección inicial según los filtros:
+        // - Si viene rango de fechas (desde/hasta) => abrir Calendario
+        // - En caso contrario => Dashboard por defecto
+        const searchParams = new URLSearchParams(window.location.search);
+        const tieneRangoCalendario = searchParams.has('desde') || searchParams.has('hasta');
+
+        if (tieneRangoCalendario) {
+          activateSection('calendario');
+        } else {
+          activateSection('dashboard');
+        }
       });
     </script>
     

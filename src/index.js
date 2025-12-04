@@ -76,46 +76,65 @@ pool.query('SELECT 1 AS test', (err) => {
 app.get('/', (req, res) => {
   res.redirect('/colaboradores');
 });
-
 // Vista HTML con HBS: todo en la misma página (colaboradores + calendario + alertas)
 app.get('/colaboradores', (req, res) => {
-  const { tipoOnboarding, estado } = req.query;
+  const { tipoOnboarding, estado, desde, hasta } = req.query;
 
+  // -----------------------------
+  // 1) Consultar colaboradores (con filtros)
+  // -----------------------------
   let sqlColab = 'SELECT * FROM colaboradores WHERE 1=1';
   const paramsColab = [];
 
   if (tipoOnboarding === 'bienvenida') {
     if (estado === 'completado') sqlColab += ' AND onboarding_bienvenida = 1';
-    if (estado === 'pendiente') sqlColab += ' AND onboarding_bienvenida = 0';
+    if (estado === 'pendiente')  sqlColab += ' AND onboarding_bienvenida = 0';
   }
 
   if (tipoOnboarding === 'tecnico') {
     if (estado === 'completado') sqlColab += ' AND onboarding_tecnico = 1';
-    if (estado === 'pendiente') sqlColab += ' AND onboarding_tecnico = 0';
+    if (estado === 'pendiente')  sqlColab += ' AND onboarding_tecnico = 0';
   }
 
-  // 1) Consultar colaboradores (con filtros)
   pool.query(sqlColab, paramsColab, (errColab, colaboradores) => {
     if (errColab) {
       console.error('❌ Error cargando colaboradores:', errColab);
       return res.status(500).send('Error cargando colaboradores');
     }
 
-    // 2) Consultar calendario de onboardings técnicos
-    const sqlCal = `
+    // -----------------------------
+    // 2) Consultar calendario (con posible filtro por rango de fechas)
+    // -----------------------------
+    let sqlCal = `
       SELECT *,
              DATEDIFF(fecha_fin, fecha_inicio) + 1 AS duracion_dias
       FROM onboardings_tecnicos
-      ORDER BY fecha_inicio
+      WHERE 1=1
     `;
+    const paramsCal = [];
 
-    pool.query(sqlCal, (errCal, sesiones) => {
+    // Filtro por rango de fechas (opcional)
+    if (desde) {
+      sqlCal += ' AND fecha_inicio >= ?';
+      paramsCal.push(desde);
+    }
+
+    if (hasta) {
+      sqlCal += ' AND fecha_fin <= ?';
+      paramsCal.push(hasta);
+    }
+
+    sqlCal += ' ORDER BY fecha_inicio';
+
+    pool.query(sqlCal, paramsCal, (errCal, sesiones) => {
       if (errCal) {
         console.error('❌ Error cargando calendario:', errCal);
         return res.status(500).send('Error cargando calendario');
       }
 
+      // -----------------------------
       // 3) Consultar sesiones que generan alerta (una semana antes)
+      // -----------------------------
       const sqlAlertas = `
         SELECT *,
                DATEDIFF(fecha_inicio, CURDATE()) AS dias_para_inicio
@@ -129,13 +148,14 @@ app.get('/colaboradores', (req, res) => {
           return res.status(500).send('Error consultando alertas');
         }
 
-        // Simulación de envío de correo: se imprime en consola
         if (alertas.length > 0) {
           console.log('📧 [SIMULACIÓN] Estas sesiones deberían generar alerta una semana antes:');
           console.log(alertas);
         }
 
-        // Formatear fechas para la vista
+        // -----------------------------
+        // 4) Formatear datos para la vista
+        // -----------------------------
         const colaboradoresFmt = colaboradores.map((c) => ({
           ...c,
           fecha_ingreso_display: formatDateDisplay(c.fecha_ingreso),
@@ -166,13 +186,15 @@ app.get('/colaboradores', (req, res) => {
           esTecnico: tipoOnboarding === 'tecnico',
           tieneFiltroEstado: !!estado,
           estadoCompletado: estado === 'completado',
-          estadoPendiente: estado === 'pendiente'
+          estadoPendiente: estado === 'pendiente',
+          // filtros de calendario (por si luego los quieres usar en value="")
+          filtroDesde: desde || '',
+          filtroHasta: hasta || ''
         });
       });
     });
   });
 });
-
 // Crear colaborador desde el formulario de la vista
 app.post('/colaboradores/crear', (req, res) => {
   const { nombre, correo, fecha_ingreso, fecha_onboarding_tecnico } = req.body;
