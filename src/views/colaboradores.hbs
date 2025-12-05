@@ -144,9 +144,33 @@
           </select>
         </div>
 
-        <button class="bg-[#0033a0] text-white px-4 py-2 rounded-lg hover:bg-[#00246e] shadow-sm text-sm font-medium">
-          Aplicar filtros
-        </button>
+        <div>
+          <label class="block text-sm font-medium mb-1">Nombre</label>
+          <input
+            type="text"
+            name="nombre"
+            class="border p-2 rounded w-full"
+            placeholder="Buscar por nombre"
+            value="{{filtroNombre}}"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Correo</label>
+          <input
+            type="text"
+            name="correo"
+            class="border p-2 rounded w-full"
+            placeholder="Buscar por correo"
+            value="{{filtroCorreo}}"
+          />
+        </div>
+
+        <div class="w-full flex justify-end pt-2">
+          <button class="bg-[#0033a0] text-white px-4 py-2 rounded-lg hover:bg-[#00246e] shadow-sm text-sm font-medium">
+            Aplicar filtros
+          </button>
+        </div>
       </form>
 
       <!-- Tabla de colaboradores -->

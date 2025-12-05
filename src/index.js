@@ -76,9 +76,13 @@ pool.query('SELECT 1 AS test', (err) => {
 app.get('/', (req, res) => {
   res.redirect('/colaboradores');
 });
+
+
+
+
 // Vista HTML con HBS: todo en la misma página (colaboradores + calendario + alertas)
 app.get('/colaboradores', (req, res) => {
-  const { tipoOnboarding, estado, desde, hasta } = req.query;
+  const { tipoOnboarding, estado, desde, hasta, nombre, correo } = req.query;
 
   // -----------------------------
   // 1) Consultar colaboradores (con filtros)
@@ -94,6 +98,18 @@ app.get('/colaboradores', (req, res) => {
   if (tipoOnboarding === 'tecnico') {
     if (estado === 'completado') sqlColab += ' AND onboarding_tecnico = 1';
     if (estado === 'pendiente')  sqlColab += ' AND onboarding_tecnico = 0';
+  }
+
+  // 🔎 Filtro por nombre (LIKE, insensible a mayúsculas)
+  if (nombre && nombre.trim() !== '') {
+    sqlColab += ' AND LOWER(nombre) LIKE ?';
+    paramsColab.push(`%${nombre.toLowerCase()}%`);
+  }
+
+  // 🔎 Filtro por correo (LIKE, insensible a mayúsculas)
+  if (correo && correo.trim() !== '') {
+    sqlColab += ' AND LOWER(correo) LIKE ?';
+    paramsColab.push(`%${correo.toLowerCase()}%`);
   }
 
   pool.query(sqlColab, paramsColab, (errColab, colaboradores) => {
@@ -187,6 +203,9 @@ app.get('/colaboradores', (req, res) => {
           tieneFiltroEstado: !!estado,
           estadoCompletado: estado === 'completado',
           estadoPendiente: estado === 'pendiente',
+          // filtros de texto (nombre/correo) para mantener en los inputs
+          filtroNombre: nombre || '',
+          filtroCorreo: correo || '',
           // filtros de calendario (por si luego los quieres usar en value="")
           filtroDesde: desde || '',
           filtroHasta: hasta || ''
@@ -195,6 +214,9 @@ app.get('/colaboradores', (req, res) => {
     });
   });
 });
+
+
+
 // Crear colaborador desde el formulario de la vista
 app.post('/colaboradores/crear', (req, res) => {
   const { nombre, correo, fecha_ingreso, fecha_onboarding_tecnico } = req.body;
